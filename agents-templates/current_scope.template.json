@@ -1,0 +1,9 @@
+{
+  "task": "short task description",
+  "spec_section": "functional_domain.md §N",
+  "in_scope": [
+    "src/example/File.js",
+    "test/unit/File.test.js",
+    ".agents/task.md"
+  ]
+}
