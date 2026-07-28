@@ -1,0 +1,28 @@
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors/IDEs
+.vscode/
+.idea/
+*.swp
+
+# Node (hooks under claude/hooks/*.mjs may grow dependencies)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Secrets / local env
+.env
+.env.*
+!.env.example
+.env.*.example
+*.local
+
+# Task Boundary Contract: transient per-task file, deleted when the task
+# closes (see CLAUDE.md Step 3). Never commit an in-flight scope.
+.agents/current_scope.json
+
+# Deploy script output/logs, if any land at repo root
+/*.log
