@@ -34,8 +34,6 @@ const rel = (isAbsolute(rawPath) ? relative(projectDir, rawPath) : rawPath)
   .replaceAll("\\", "/");
 
 // Self-exemption: the manifest itself is always editable, active contract
-// Self-exemption: the manifest itself is always editable, active contract
-// Self-exemption: the manifest itself is always editable, active contract
 // or not. Amending scope IS the Lead-approved amendment flow CLAUDE.md
 // describes — blocking it forces deleting the whole manifest instead,
 // which disables enforcement for every file, not just this one. A narrow
