@@ -145,3 +145,16 @@ handful of hook scripts — see handoff notes).
   the current regex set and pass through unchecked. Backstop remains
   the reviewer's independent `git status` check, per ADR-002's
   precedent.
+
+### Follow-up: flag-order and long-form-flag gap (closed)
+
+The short-flag-only, position-anchored regexes missed `--force`-style long
+flags AND reordered short flags (`git reset -q --hard` slipped through) —
+same root cause, not two bugs. Replaced with a per-clause token scan
+(command split on top-level `&&`/`||`/`;`/`|`) that checks for the
+relevant flag anywhere in the subcommand's argument list. Added: bare
+`git checkout -f`/`--force` (tree-wide, previously unhandled) and
+corrected `git restore --staged --worktree` (previously excluded by the
+`--staged`-alone check even though `--worktree` makes it touch the
+working tree too). Full regression matrix re-verified against a fixture
+repo; no prior passing case regressed.

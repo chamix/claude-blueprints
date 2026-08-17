@@ -2,8 +2,10 @@
 /**
  * PreToolUse hook — destructive-git-command guard.
  * Blocks Bash calls that would discard uncommitted work via a whole-file
- * or whole-tree git revert (`git checkout -- <path>`, `git restore
- * <path>` without `--staged`, `git reset --hard`, `git clean -f`/`-fd`).
+ * or whole-tree git revert: `git checkout [--] <path>`, bare `git
+ * checkout -f`/`--force` (tree-wide, no path), `git restore <path>`
+ * (unless `--staged` without `--worktree`), `git reset --hard`, and
+ * `git clean -f`/`-fd`/`--force`.
  *
  * Root cause this closes: code-reviewer holds no Edit/Write tools "by
  * design" (code-reviewer.md), but its `tools:` frontmatter still grants
@@ -15,23 +17,41 @@
  * scope-EXPANSION checks; this covers Bash DESTROYING already-legitimate,
  * in-scope work that just happens to still be uncommitted.
  *
- * Deliberately narrow: only blocks when the target path (or, for
- * tree-wide commands, the whole working tree) actually HAS uncommitted
- * changes right now. Checkout/reset/clean on already-clean state is a
- * harmless no-op and stays allowed — this must not get in the way of
- * routine, safe use of these commands.
+ * Deliberately narrow: only blocks when the target actually HAS
+ * uncommitted changes right now. Checkout/reset/clean on already-clean
+ * state is a harmless no-op and stays allowed — this must not get in
+ * the way of routine, safe use of these commands.
  *
- * Verified by hand (see ADR-005 "Verification" addendum) against a
- * throwaway git fixture: checkout/restore/reset-hard block correctly on
- * dirty tracked content and allow on clean; `restore --staged` is
- * correctly excluded. `git clean -f`/`-fd` needed a second check —
- * `git diff --quiet HEAD` only inspects TRACKED content, so a brand-new
- * file that was never `git add`-ed is invisible to it, and the original
- * draft let `git clean -f` delete such files unblocked. Fixed by adding
- * an untracked-file check (`git status --porcelain`, which itself
- * respects .gitignore, matching what `git clean -f` actually targets)
- * for clean specifically; checkout/restore/reset --hard don't need it
- * since none of them touch untracked files.
+ * Detection is a plain whitespace token scan per top-level clause, not a
+ * position-anchored regex and not a shell parser. Rationale, discovered
+ * during hand-verification (see ADR-005 Verification):
+ *  - `git diff --quiet HEAD` only sees TRACKED content, so `clean -f`
+ *    needed an added untracked-file check (git status --porcelain,
+ *    .gitignore-respecting, matching what clean -f itself would target).
+ *  - The original position-anchored regexes (`-f` required to sit
+ *    immediately after `clean`/`reset`) missed both `--force`-style long
+ *    flags AND reordered short flags (`git reset -q --hard` slipped
+ *    through). A token scan checks for the relevant flag ANYWHERE in the
+ *    subcommand's argument list, closing both at once — they're the same
+ *    root cause, not two separate bugs.
+ *  - Bare `git checkout -f`/`--force` with no path/branch argument is
+ *    tree-wide (same danger class as `reset --hard`) and wasn't handled
+ *    at all before. A force flag with no explicit `--` pathspec
+ *    separator is now treated as tree-wide too (covers `git checkout -f
+ *    <branch>`, which is ambiguous between "force-switch branches" and
+ *    "force this path" without `--`, and errs toward the safer read).
+ *  - `git restore --staged` is safe alone (index only), but `--staged
+ *    --worktree` together also mutate the working tree — the exclusion
+ *    now only applies when `--worktree` is absent.
+ *  - Command is split on top-level `&&`/`||`/`;`/`|` so a flag from one
+ *    chained command can't be misattributed to another. This is still
+ *    not a shell parser — quoting and subshells aren't resolved, same
+ *    accepted-gap posture as elsewhere in this repo (ADR-002).
+ *
+ * Known, still-accepted gap: multi-path targets after `--` (e.g.
+ * `git checkout -- a.js b.js`) only check the first path, same as the
+ * original draft. Not touched here — out of scope for this pass; the
+ * reviewer's independent `git status` check remains the backstop.
  *
  * Exit 2 = block; stderr is fed back to Claude as the reason.
  */
@@ -56,21 +76,73 @@ if (!command) process.exit(0);
 const projectDir =
   process.env.CLAUDE_PROJECT_DIR ?? input.cwd ?? process.cwd();
 
-// Deliberately simple string/regex matching, same philosophy as the
-// other hooks — no shell-parsing dependency, this doesn't need one.
-// `includeUntracked` on the `clean` pattern only: reset --hard and
-// checkout/restore never touch untracked files, but `clean -f`/`-fd`'s
-// whole purpose is to remove them, so it needs the wider check.
-const PATTERNS = [
-  { re: /\bgit\s+checkout\s+(?:--\s+)?(\S+)/, kind: "path" },
-  {
-    re: /\bgit\s+restore\s+(?:--staged\S*\s+)?(\S+)/,
-    kind: "path",
-    excludeIf: /--staged\b/, // --staged only touches the index, not working-tree content
-  },
-  { re: /\bgit\s+reset\s+--hard\b/, kind: "tree" },
-  { re: /\bgit\s+clean\s+-[a-z]*f[a-z]*\b/, kind: "tree", includeUntracked: true },
-];
+// Split on top-level shell-chaining operators only.
+const CLAUSES = command.split(/&&|\|\||[;|]/);
+
+const tokenize = (clause) => clause.trim().split(/\s+/).filter(Boolean);
+
+const isForceFlag = (t) => t === "--force" || /^-[a-z]*f[a-z]*$/.test(t);
+const isHardFlag = (t) => t === "--hard";
+const isStagedFlag = (t) => t === "--staged" || t.startsWith("--staged=");
+const isWorktreeFlag = (t) => t === "--worktree" || t.startsWith("--worktree=");
+
+function findVerdictTarget(clause) {
+  const tokens = tokenize(clause);
+  const gitIdx = tokens.findIndex(
+    (t, i) =>
+      t === "git" &&
+      ["checkout", "restore", "reset", "clean"].includes(tokens[i + 1] ?? "")
+  );
+  if (gitIdx === -1) return null;
+
+  const sub = tokens[gitIdx + 1];
+  const args = tokens.slice(gitIdx + 2);
+
+  if (sub === "checkout" || sub === "restore") {
+    if (sub === "restore") {
+      const staged = args.some(isStagedFlag);
+      const worktree = args.some(isWorktreeFlag);
+      if (staged && !worktree) return null; // index-only, safe
+    }
+
+    const dashIdx = args.indexOf("--");
+    const hasForce = sub === "checkout" && args.some(isForceFlag);
+
+    if (dashIdx !== -1) {
+      // Explicit pathspec separator — unambiguous, always path-scoped.
+      const target = args[dashIdx + 1];
+      return target ? { kind: "path", target, includeUntracked: false } : null;
+    }
+
+    if (hasForce) {
+      // No `--`, but a force flag present: ambiguous between "force this
+      // path" and "force-switch branch, discarding tracked changes" —
+      // treat as tree-wide, the safer read.
+      return { kind: "tree", target: ".", includeUntracked: false };
+    }
+
+    const firstNonFlag = args.find((a) => !a.startsWith("-"));
+    if (firstNonFlag) {
+      return { kind: "path", target: firstNonFlag, includeUntracked: false };
+    }
+    return null; // bare `git checkout` / `git restore` with no args — no-op
+  }
+
+  if (sub === "reset") {
+    return args.some(isHardFlag)
+      ? { kind: "tree", target: ".", includeUntracked: false }
+      : null;
+  }
+
+  if (sub === "clean") {
+    // clean -f/-fd/--force removes untracked files too, unlike the others.
+    return args.some(isForceFlag)
+      ? { kind: "tree", target: ".", includeUntracked: true }
+      : null;
+  }
+
+  return null;
+}
 
 function hasUncommittedChanges(target, { includeUntracked = false } = {}) {
   const t = JSON.stringify(target ?? ".");
@@ -81,32 +153,26 @@ function hasUncommittedChanges(target, { includeUntracked = false } = {}) {
   } catch {
     return true;
   }
-
   if (includeUntracked) {
-    // git diff HEAD is blind to files that were never `git add`-ed.
-    // git status --porcelain also respects .gitignore, same as
-    // `git clean -f` itself, so this won't false-positive on ignored
-    // build artifacts sitting in the tree.
+    // git diff HEAD is blind to files never `git add`-ed. git status
+    // --porcelain also respects .gitignore, matching what `git clean -f`
+    // itself would actually remove.
     const status = execSync(`git status --porcelain -- ${t}`, {
       cwd: projectDir,
       encoding: "utf8",
     });
     if (status.trim().length > 0) return true;
   }
-
   return false;
 }
 
-for (const { re, kind, excludeIf, includeUntracked } of PATTERNS) {
-  const match = command.match(re);
-  if (!match) continue;
-  if (excludeIf && excludeIf.test(command)) continue;
-
-  const target = kind === "path" ? match[1] : ".";
-  if (hasUncommittedChanges(target, { includeUntracked })) {
+for (const clause of CLAUSES) {
+  const verdict = findVerdictTarget(clause);
+  if (!verdict) continue;
+  if (hasUncommittedChanges(verdict.target, { includeUntracked: verdict.includeUntracked })) {
     process.stderr.write(
-      `BLOCKED: '${command.trim()}' would discard uncommitted changes ` +
-        `${kind === "path" ? `on '${target}'` : "in the working tree"}. ` +
+      `BLOCKED: '${clause.trim()}' would discard uncommitted changes ` +
+        `${verdict.kind === "path" ? `on '${verdict.target}'` : "in the working tree"}. ` +
         `If this is your own fault-injection revert, use a narrower method ` +
         `that only undoes YOUR edit (git apply -R on a captured patch, or a ` +
         `direct string revert) — a whole-file/tree checkout can't ` +
