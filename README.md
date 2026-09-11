@@ -12,6 +12,7 @@ enforcement via hooks.
   - `agents/` — subagent definitions (separate contexts, restricted tools)
   - `commands/` — slash commands (`/audit-design`, `/audit-docs`, `/log-run`)
   - `hooks/` — Node.js enforcement hooks (cross-platform, no Git Bash dependency)
+  - `knowledge/` — agent-consumable reference material, separate from role-contract prose (ADR-006); fixed-pointer modules for `code-reviewer`/`technical-writer`, declared-per-task stack modules for `full-stack-engineer`
   - `settings.json` — hook wiring
 - `agents-templates/` — seeds for the target repo's `.agents/` workspace
 - `scripts/deploy.ps1` — copies the system into a target repo
