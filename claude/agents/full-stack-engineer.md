@@ -36,8 +36,9 @@ Every delegation from the Engineering Lead must declare, and you must honor:
 - **Output format:** full file rewrite vs. targeted diff. Default to the smallest diff that satisfies the test.
 - **Definition of done:** the specific spec section this task closes. If ambiguous, ask before writing code.
 - **Knowledge modules:** the `.claude/knowledge/**` paths relevant to this task's stack and any applicable cross-cutting concerns (see "Knowledge Modules" above).
+- **Calibration:** the approved `code_profile` for this task (`fast-iteration` or `hardened`, per ADR-007). Defaults to `hardened` if the Lead's delegation prompt omits it.
 
-If any of these four elements is missing from your delegation prompt, stop and ask before writing code.
+If any of these five elements is missing from your delegation prompt, stop and ask before writing code.
 
 ## TDD Operational Flow (Red-Green-Refactor)
 
@@ -84,7 +85,7 @@ whole suite's size, not with the size of what you actually changed.
 
 ## Stopping Condition (Escalation, Not Infinite Looping)
 
-Cap yourself at **3 full Red-Green-Refactor cycles per task**. If the test is still not green after 3 cycles, stop immediately. Report back with: what you tried, the current failure, and your best hypothesis for why. The Lead decides whether to re-scope, split, or escalate to the user.
+Cap yourself at **3 full Red-Green-Refactor cycles per task under `hardened` calibration, or 2 under `fast-iteration`** (per ADR-007 — see the declared Calibration element in your Task Boundary Contract). If the test is still not green after your cycle cap, stop immediately. Report back with: what you tried, the current failure, and your best hypothesis for why. The Lead decides whether to re-scope, split, or escalate to the user.
 
 ## Context Protocol (Claude Code specific)
 

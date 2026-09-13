@@ -37,15 +37,18 @@ Once the functional domain is established, map those pure rules to an optimized 
 - **Pattern Application:** Explicitly select and document appropriate GoF patterns.
 - **Output:** Append this plan to `.agents/specs/initial_scaffold.md` and present the complete blueprint to the user for explicit approval.
 - **Stack declaration:** Note which `.claude/knowledge/<stack>/` this project uses (creating it under Step 2's guidance if it doesn't exist yet) — this is what Step 2's delegation prompts will reference.
+- **Calibration suggestion (ADR-007):** Suggest a `code_profile` (`fast-iteration` or `hardened`) for this task, and a `docs_profile` (`delivery` or `blog-detailed`) if the task's definition of done includes documentation output. Default to `hardened`/`delivery` unless something about the task argues otherwise. Present this alongside the rest of the blueprint for the same explicit user approval — not a separate decision point.
 
 ### Step 2: Implementation Delegation
 
 1. Upon user validation and approval, write the task scope manifest to `.agents/current_scope.json` (see the Scope Contract section) **before** delegating to the `full-stack-engineer` subagent.
-2. Every delegation prompt must declare: in-scope file paths, expected output format (full rewrite vs. diff), which spec section the task closes, and which `.claude/knowledge/**` modules apply (this task's stack bibliography, plus `.claude/knowledge/security/general.md` and any stack-specific security file whenever the task is security-relevant). If none apply, say so explicitly rather than omitting the element.
+2. Every delegation prompt must declare: in-scope file paths, expected output format (full rewrite vs. diff), which spec section the task closes, which `.claude/knowledge/**` modules apply (this task's stack bibliography, plus `.claude/knowledge/security/general.md` and any stack-specific security file whenever the task is security-relevant), and the approved `code_profile` for this task (ADR-007). If no knowledge modules apply, say so explicitly rather than omitting the element.
 3. Subagents start with a fresh context window. Include the relevant file paths, spec excerpts, and prior decisions directly in the delegation prompt — they cannot see this conversation.
-4. Instruct the engineer to follow its TDD Red-Green-Refactor loop, respecting its 3-cycle stopping condition.
+4. Instruct the engineer to follow its TDD Red-Green-Refactor loop, respecting its stopping condition (3 cycles under `hardened`, 2 under `fast-iteration` — per the declared `code_profile`).
 
 ### Step 2.5: Independent Review (Blocking Gate)
+
+**Skip this step entirely if this task's approved `code_profile` is `fast-iteration` (ADR-007)** — no `code-reviewer` invocation, no `review_report.md`, no Blocking gate. Proceed straight to Step 3, and say so explicitly in that step's report to the user. Otherwise (`hardened`, or no profile declared), continue below.
 
 You do **not** review your own delegated work. You wrote the spec; grading your own plan invites confirmation bias.
 
@@ -56,9 +59,9 @@ You do **not** review your own delegated work. You wrote the spec; grading your 
 
 ### Step 3: Log & Deliver
 
-1. Run `/log-run` to append this task to `.agents/metrics/RUN_LOG.md` before closing out. Use `/cost` output for real cost data instead of estimates where available.
+1. Run `/log-run` to append this task to `.agents/metrics/RUN_LOG.md` before closing out, including the `code_profile`/`docs_profile` used (ADR-007). Use `/cost` output for real cost data instead of estimates where available.
 2. Delete `.agents/current_scope.json` — the contract is closed.
-3. Present the final result to the user along with the reviewer's verdict summary.
+3. Present the final result to the user along with the reviewer's verdict summary — or, if Step 2.5 was skipped under `fast-iteration`, say so explicitly ("delivered — no independent review, fast-iteration profile active") rather than letting its absence go unmentioned.
 
 ## Scope Contract
 
