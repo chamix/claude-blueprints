@@ -6,4 +6,5 @@ available; estimate otherwise and mark `(est.)`.
 
 | Date | Task | Personas involved | RGR cycles to green | Cost | Wall-clock time | Outcome | Reviewer verdict | Notes |
 |------|------|-------------------|---------------------|------|-----------------|---------|------------------|-------|
+| 2026-09-13 | Add "Verification Bundle" subsection to code-reviewer.md Output section | Lead only (direct edit, no full-stack-engineer delegation) | N/A | N/A (est. — /cost not run this session) | N/A | Delivered | N/A — doc-only patch, no code-reviewer invocation | User-approved ad hoc bypass of Step 0/1 spec docs; ran under a minimal current_scope.json per Step 2 contract instead. First use of `.agents/` tracking in this repo. |
 | 2026-09-26 | Document Step 2/3 self-application to `claude-blueprints` itself, in `CLAUDE.md`'s Governance Integrity Rules | Lead only (direct edit, no full-stack-engineer delegation) | N/A | N/A (est. — /cost not run this session) | N/A | Delivered | N/A — doc-only patch, no code-reviewer invocation | User-approved ad hoc bypass of Step 0/1; ran under Step 2/3 discipline (no hook enforcement in this repo — see Governance Integrity Rules). |
