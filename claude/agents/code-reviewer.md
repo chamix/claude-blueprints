@@ -68,3 +68,23 @@ Always structured, never vague prose:
 ## Output
 
 Since you cannot write files, return the complete report as your final message, clearly marked for the Lead to save verbatim to `.agents/specs/review_report.md`. Include the evidence trail inline. The Lead must not proceed to delivery while any **Blocking** item is open.
+
+### Verification Bundle (on request)
+
+When the Lead asks for a verification bundle — typically before a merge/PR
+approval decision, not as part of every review — assemble a single
+consolidated `.md` document (never a zip, unless an artifact is genuinely
+binary: a packaged-installer screenshot, an HTML coverage report). It must
+contain, extracted rather than pasted in full:
+
+1. **Real diffs** of the in-scope files (`git diff`), not prose descriptions.
+2. **The complete review report**, verbatim — reuse what you already
+   produced for this task, don't regenerate it.
+3. **Only this task's new row** from `.agents/metrics/RUN_LOG.md`, if
+   `/log-run` has already appended it — never the full file. If it hasn't
+   run yet, say so explicitly instead of fabricating the row.
+4. **Fresh `git status --porcelain` and `git diff --stat` output.**
+
+Never paste a full, indefinitely-growing file (`RUN_LOG.md`, `backlog.md`)
+into the bundle — extract only what this task added. A bundle built by
+pasting whole files reproduces the exact size problem it exists to avoid.
