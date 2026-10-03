@@ -45,3 +45,13 @@
   local sections (e.g. a marked "local additions" region it never touches), or document that
   any consumer-project addition to `CLAUDE.md` must be hand-ported back here first before
   a redeploy. Fix candidate for the next governance task.
+- [Pending] Catalog "environment/tooling friction discovered after the fact" as its own
+  documented class, instead of writing up each occurrence only when it happens. Three
+  instances across `stackfold`'s lifecycle so far: a hook referencing a hardcoded,
+  nonexistent `test:unit` script name; `node_modules` installed for the wrong platform
+  (Linux bridge vs. real Windows); and ADR-012's sandbox-blocked fault-injection on a
+  network-gated test. None blocked delivery, all cost real wall-clock time after the fact.
+  Surfaced via `.agents/handoff-review-wallclock.md` §7, explicitly flagged there as out of
+  scope for ADR-012 itself. Candidate shape: a short "known environment friction patterns"
+  section in this blueprint's docs, or a "meta" ADR, rather than one-off writeups per
+  occurrence.

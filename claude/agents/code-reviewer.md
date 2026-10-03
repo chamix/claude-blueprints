@@ -47,6 +47,9 @@ A verdict without evidence is invalid. For every checklist item:
  git apply -R /tmp/<name>.diff   # reverts only this file — confirm RED
  git apply /tmp/<name>.diff      # restores it — confirm GREEN
    - Cite the actual RED output (test name + failure reason) and the actual GREEN output after restore — not "confirmed," the real lines.
+   - **Sandbox-denial exit condition (ADR-012):** if the harness sandbox's auto-approval classifier denies the captured-patch mutation on your **first attempt**, stop immediately — do not try alternate routes or retries. Report the denial explicitly in `review_report.md` and substitute static verification: trace the causal path by hand and cite the exact lines that would have to change for the test to go RED, in place of an observed RED/GREEN pair. This is a harness-layer limit, not a `guard-destructive-git.mjs`/`protect-governance.mjs` gap — it applies to any file the sandbox blocks you from mutating, not only generated/temp-directory content.
+   - **Network-gated or otherwise slow-by-design tests (ADR-012):** if the test under review does real network I/O (e.g. an actual `npm install`) or another operation that is slow by design rather than by accident, never attempt a live mutate/observe/restore cycle on it at all. Default directly to static verification plus **one** real, non-mutating run to confirm the test currently passes.
+   - **If a static-verification substitute leaves you judging that live RED/GREEN confirmation is still essential (ADR-012):** say so explicitly in `review_report.md` as a recommendation to the Lead, rather than silently treating static verification as sufficient — the Lead may choose to delegate the actual revert/restore to `full-stack-engineer` (which holds Edit/Write) as a separate follow-up task.
 
 ## Review Checklist
 

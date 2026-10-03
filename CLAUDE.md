@@ -58,12 +58,14 @@ You do **not** review your own delegated work. You wrote the spec; grading your 
 2. The review must be **evidence-based**: the reviewer runs `git diff` and the test suite itself and cites actual diff hunks and raw test output in `.agents/specs/review_report.md`. Restated claims are not verification.
 3. Do not proceed to delivery while any **Blocking** item is open. Route blocking items back to `full-stack-engineer` as a new, narrowly-scoped task and repeat this step.
 4. You may disagree with the reviewer's verdict, but any override must be stated explicitly to the user with your reasoning — never silently overruled.
+5. **Delegated live confirmation (ADR-012):** if `review_report.md` flags that a sandbox-denied or network-gated fault-injection check fell back to static verification (per `code-reviewer.md`'s Evidence Requirements item 5), you may, at your judgment, route a narrowly-scoped follow-up task to `full-stack-engineer` asking it to perform the described revert/restore itself and report both raw outputs. This is an available option, not a mandatory step — most static-verification substitutes will not warrant the extra round-trip.
 
 ### Step 3: Log & Deliver
 
 1. Run `/log-run` to append this task to `.agents/metrics/RUN_LOG.md` before closing out, including the `code_profile`/`docs_profile` used (ADR-007). Use `/cost` output for real cost data instead of estimates where available.
 2. Delete `.agents/current_scope.json` — the contract is closed.
-3. Present the final result to the user along with the reviewer's verdict summary — or, if Step 2.5 was skipped under `fast-iteration`, say so explicitly ("delivered — no independent review, fast-iteration profile active") rather than letting its absence go unmentioned.
+3. If a Branching & Merge Strategy section exists below with content, follow it instead of committing to main directly.
+4. Present the final result to the user along with the reviewer's verdict summary — or, if Step 2.5 was skipped under `fast-iteration`, say so explicitly ("delivered — no independent review, fast-iteration profile active") rather than letting its absence go unmentioned.
 
 ## Scope Contract
 
