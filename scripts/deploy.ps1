@@ -6,7 +6,7 @@
   Copies CLAUDE.md and the claude/ tree (as .claude/) into the target repo,
   and seeds the .agents/ workspace (specs/, metrics/) if missing.
   Project-specific state in the target (.agents/specs, RUN_LOG rows,
-  current_scope.json) is never overwritten.
+  current_scope.json, .claude/project/**) is never overwritten.
 
 .EXAMPLE
   .\scripts\deploy.ps1 -TargetRepo C:\Source\json-mapper
@@ -51,7 +51,26 @@ if (-not (Test-Path $RunLog)) {
     Write-Host "  [skip] RUN_LOG.md exists (append-only, preserved)"
 }
 
-# 4. Warn about stale scope manifests
+# 4. Seed per-project extension points (never overwrite an existing one —
+#    ADR-011). Each entry here is a (template, target-relative-path) pair;
+#    add future extension points to this list rather than inventing a new
+#    mechanism per point.
+$ExtensionPoints = @(
+    @{ Template = "branching.md"; TargetRelative = ".claude\project\branching.md" }
+)
+foreach ($point in $ExtensionPoints) {
+    $TargetFile = Join-Path $TargetRepo $point.TargetRelative
+    if (-not (Test-Path $TargetFile)) {
+        New-Item -ItemType Directory -Path (Split-Path $TargetFile) -Force | Out-Null
+        Copy-Item -Path (Join-Path $BlueprintRoot "agents-templates\$($point.Template)") `
+                  -Destination $TargetFile
+        Write-Host "  [ok] Seeded $($point.TargetRelative)"
+    } else {
+        Write-Host "  [skip] $($point.TargetRelative) exists (project-owned, preserved)"
+    }
+}
+
+# 5. Warn about stale scope manifests
 $ScopeFile = Join-Path $TargetAgents "current_scope.json"
 if (Test-Path $ScopeFile) {
     Write-Warning "A current_scope.json exists in the target. If no task is in flight, delete it — a stale manifest blocks edits."

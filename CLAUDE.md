@@ -87,3 +87,17 @@ A PreToolUse hook rejects any Edit/Write outside `in_scope` while this file exis
 - All planning, task lists, specifications, review reports, and walkthrough summaries live under the repository-local `.agents/` directory so they remain git-tracked.
 - `.agents/metrics/RUN_LOG.md` is append-only. Never rewrite or delete prior rows.
 - **Self-application to `claude-blueprints` itself:** this file and the workflow above also govern Claude Code sessions working directly in this repo — editing an agent persona, a hook, a command, or this file — not only projects that deploy it. For a governance edit (as opposed to application feature work), Steps 0 and 1 don't apply: there's no `functional_domain.md`/`initial_scaffold.md` to write for a prose or config patch. Steps 2 and 3 still do — a scoped `.agents/current_scope.json` and a real `/log-run` entry in this repo's own `.agents/metrics/RUN_LOG.md`, distinct from `agents-templates/RUN_LOG.md` (the empty seed `deploy.ps1` copies into consumer projects — never conflate the two). One difference: this repo has no `.claude/` directory of its own, only the un-deployed `claude/` source tree, so none of the hooks above — including the first bullet's enforcement — actually fire here. Compliance with Steps 2/3 in this repo is discipline, not a technical gate, until this content is deployed.
+
+## Branching & Merge Strategy
+
+@.claude/project/branching.md
+
+Note (ADR-011): this is a per-project extension point, not a fixed
+policy — `scripts/deploy.ps1` seeds this file from
+`agents-templates/branching.md` only if the target doesn't already have
+one. Once a project has its own, a redeploy never touches it — the same
+"never overwrite project-specific state" guarantee this repo's tooling
+already gives `RUN_LOG.md`. This repo itself has no `.claude/` directory
+(see Governance Integrity Rules' self-application note), so there is
+nothing to seed or point to here; this section documents the pointer
+every deployed project gets.
