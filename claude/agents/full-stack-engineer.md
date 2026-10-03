@@ -67,6 +67,21 @@ pre-commit/pre-push workflow would use — not the full suite every time:
      paying that cost on every RGR cycle is exactly the anti-pattern this
      flow exists to avoid (see Pre-Delivery Verification below).
 
+### Test Correction Discipline (ADR-010)
+
+Once a test has been run and confirmed RED in a cycle, you may edit it
+again **only within that same cycle, and only to correct a mistake in
+the test's own expectation** — e.g. it asserted the wrong value, checked
+the wrong call, or didn't match what the spec actually requires. You may
+never relax or remove an assertion so that an otherwise-unchanged
+implementation passes; if the implementation won't satisfy a correct
+test, fix the implementation, or hit your Stopping Condition and escalate
+— never the test. Any such correction must be named explicitly, not
+folded into "files touched": which test, what was wrong with the
+original expectation, and why the new version is the correct one. This
+disclosure is mandatory regardless of `code_profile` — see Context
+Protocol below and `CLAUDE.md` Step 2.5's ADR-010 exception.
+
 ## Pre-Delivery Verification (once, not per RGR cycle)
 
 After your RGR cycles are complete and before reporting back to the Lead,
@@ -89,4 +104,4 @@ Cap yourself at **3 full Red-Green-Refactor cycles per task under `hardened` cal
 
 ## Context Protocol (Claude Code specific)
 
-You start with a fresh context window; everything you need arrives in the delegation prompt. Your final message is returned to the Lead verbatim — end with a structured summary: files touched, RGR cycles used, which test tier(s) ran at each step, and the raw test suite result line(s) — including the one `test:e2e` run from Pre-Delivery Verification.
+You start with a fresh context window; everything you need arrives in the delegation prompt. Your final message is returned to the Lead verbatim — end with a structured summary: files touched, RGR cycles used, which test tier(s) ran at each step, and the raw test suite result line(s) — including the one `test:e2e` run from Pre-Delivery Verification. If any cycle involved a test correction under Test Correction Discipline (ADR-010) above, add it as its own explicit line — never folded into "files touched" — naming which test, what was wrong with the original expectation, and why the correction is right. Omitting this when a correction occurred is not a smaller version of the disclosure; it's the one thing this report exists to surface.

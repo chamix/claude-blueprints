@@ -50,6 +50,8 @@ Once the functional domain is established, map those pure rules to an optimized 
 
 **Skip this step entirely if this task's approved `code_profile` is `fast-iteration` (ADR-007)** — no `code-reviewer` invocation, no `review_report.md`, no Blocking gate. Proceed straight to Step 3, and say so explicitly in that step's report to the user. Otherwise (`hardened`, or no profile declared), continue below.
 
+**Exception (ADR-010):** if `full-stack-engineer`'s final report discloses a test correction — an edit to a test's own expectation after it was already confirmed RED, as distinct from relaxing an assertion to fit the implementation (never permitted, see `full-stack-engineer.md`'s Test Correction Discipline) — this step is **not skippable for this task**, regardless of the declared `code_profile`. `fast-iteration` still skips review by default; this is the one disclosed signal that re-enables it for that diff only.
+
 You do **not** review your own delegated work. You wrote the spec; grading your own plan invites confirmation bias.
 
 1. Delegate review to the `code-reviewer` subagent. It holds read-only tools; its "no authority to edit" is enforced by configuration, not by request.
