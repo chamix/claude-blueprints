@@ -70,3 +70,35 @@ outright rather than adjusting a threshold: the independent
 `code-reviewer` gate (Step 2.5) is skipped entirely, not run with
 lighter standards. The Lead states this explicitly in its final report
 whenever it happens — the absence of review is never left implicit.
+
+## Known Environment Friction Patterns
+
+Distinct in purpose from `backlog.md`/`RUN_LOG.md`, which are
+chronological, forensic records of what was fixed and when: this is a
+lookup for recognizing a previously-seen environment/tooling gotcha, not
+every instance of which produces a backlog or `RUN_LOG` entry of its
+own. Add to it when a *fourth* such case is discovered — don't try to
+automate this from `RUN_LOG`.
+
+- **Hook assumes a `test:unit`/`test:integration` split that the target
+  project's `package.json` doesn't define.** `run-tests-if-src.mjs`
+  hardcodes those script names; a project with only a plain `test`
+  script (e.g. `vitest run`) makes the hook report a nonexistent script
+  rather than running anything. Fix: don't rely on the hook's assumption
+  silently — when a project's actual test scripts differ, say so
+  explicitly in a "Test-tooling note" in the delegation prompt (which
+  script to use instead), the same way `stackfold`'s Cycle A delegation
+  prompts override it.
+- **`node_modules` installed for the wrong platform** (e.g. a Linux
+  dev-container/bridge installing platform-specific optional
+  dependencies, then the project running on Windows, or vice versa)
+  breaks `npm test`'s shell wrapper even though the packages themselves
+  are present. Workaround: invoke the test runner directly
+  (`node node_modules/.bin/vitest run`) instead of through `npm test`.
+  The real fix is environmental, not a code change in this repo — delete
+  and reinstall `node_modules` on the actual host platform.
+- **Fault-injection on a network-gated or sandbox-blocked test burns
+  wall-clock disproportionate to tokens spent** (reviewer waits on real
+  I/O or a denied sandbox mutation, not on reasoning). See ADR-012 for
+  the resolved exit condition — this entry just indexes the pattern
+  here too.
