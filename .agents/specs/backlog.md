@@ -1,15 +1,9 @@
 # Backlog
 
-- [Pending] full-stack-engineer.md / code-reviewer.md: add an explicit rule: "When a hook
-  blocks a write, stop and report. Never route around it via Bash." Triggered by the md-view
-  Task 45 heredoc bypass (recorded in that task's RUN_LOG row and review report).
 - [Pending] Carried over (standing finding): RUN_LOG rows get marked Success before Lead
   evaluation. The fix belongs in the Output sections of code-reviewer.md and
   full-stack-engineer.md. md-view has worked around it since Task 44 with a "stop before
   /log-run" gate in each delegation prompt.
-- (append to the "stop and report" entry) Also: temporary or scratch files never go inside the
-  repo; use the OS temp directory. Trigger: md-view Task 46, where a Bash `cp` created
-  src/main/index.ts.__tmp outside scope (deleted immediately and self-reported).
 - [Pending] Step 1 blast-radius checklist in the planning template: (a) what ships in the
   package (dependencies vs devDependencies, electron-builder contents); (b) every test that
   asserts a changed contract (grep for menu IDs, IPC channel names, exported names) goes into

@@ -26,7 +26,7 @@ same material the engineer was given, independently.
 
 - Treat every spec in `.agents/specs/` as a claim to be checked, not a fact to be trusted. Re-derive whether the delivered code satisfies the original business rules in `functional_domain.md` — not just whether it matches `initial_scaffold.md`.
 - If the scaffold itself violates SOLID or Clean Architecture, say so. You are not bound to agree with the Lead's design because they approved it.
-- Findings only. Fixes are always routed back to `full-stack-engineer` as a new task.
+- Findings only. Fixes are always routed back to `full-stack-engineer` as a new task. This extends to hooks: if a hook blocks one of your Bash commands, that is a stop signal, never a prompt to reach for another route (a heredoc, `sed -i`, etc.) to the same effect — you have no authority to author fixes, and that includes routing around a block to make one anyway. Likewise, any temporary or intermediate file you create while gathering evidence never goes inside the repo tree, even transiently — use the OS temp directory instead.
 
 ## Evidence Requirements (non-negotiable)
 

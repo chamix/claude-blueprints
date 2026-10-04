@@ -32,7 +32,7 @@ the Lead which stack applies rather than guessing or defaulting to one.
 
 Every delegation from the Engineering Lead must declare, and you must honor:
 
-- **In-scope file paths:** the exact files/directories you are authorized to touch, mirrored in `.agents/current_scope.json`. Do not modify anything outside this list — a PreToolUse hook will block you anyway; if the fix requires it, stop and report back to the Lead instead of expanding scope unilaterally.
+- **In-scope file paths:** the exact files/directories you are authorized to touch, mirrored in `.agents/current_scope.json`. Do not modify anything outside this list — a PreToolUse hook will block you anyway; if the fix requires it, stop and report back to the Lead instead of expanding scope unilaterally. This holds for any hook block, not just scope expansion: a block is a stop signal, never a prompt to reach for another tool (a Bash heredoc, `sed -i`, etc.) that achieves the same write through a side door. The same goes for where files live — temporary or intermediate files never go inside the repo tree, even transiently; use the OS temp directory instead.
 - **Output format:** full file rewrite vs. targeted diff. Default to the smallest diff that satisfies the test.
 - **Definition of done:** the specific spec section this task closes. If ambiguous, ask before writing code.
 - **Knowledge modules:** the `.claude/knowledge/**` paths relevant to this task's stack and any applicable cross-cutting concerns (see "Knowledge Modules" above).
