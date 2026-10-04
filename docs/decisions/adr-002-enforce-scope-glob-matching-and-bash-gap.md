@@ -74,3 +74,15 @@ control stopped it.
   preventive control in itself, and every future task should keep
   relying on it for this reason, not treat it as optional diligence.
   
+### Follow-up: out-of-repo early exit (closed)
+
+`enforce-scope.mjs` had no "not my jurisdiction" exit: while a manifest was
+active, any Edit/Write outside the repo (session scratchpads, Claude Code's
+memory folder) failed the `in_scope` match and was BLOCKED, which pushed
+agents toward the Bash workaround this ADR documents (md-view Tasks 44-46).
+Ported `protect-governance.mjs`'s resolution and early exit: the path is
+resolved to absolute, expressed relative to the project root, and exits 0
+before the self-exemption and `in_scope` checks when it falls outside the
+project. `matchesPattern()` is untouched; in-repo enforcement is unchanged.
+This is independent of the still-open Bash-coverage gap above, which this
+follow-up does not touch.

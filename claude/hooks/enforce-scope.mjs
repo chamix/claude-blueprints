@@ -6,7 +6,7 @@
  * Exit 2 = block; stderr is fed back to Claude as the reason.
  */
 import { readFileSync, existsSync } from "node:fs";
-import { join, relative, isAbsolute } from "node:path";
+import { join, relative, isAbsolute, resolve } from "node:path";
 
 // Trailing "/**" = recursive directory match (any depth, including the
 // directory's own direct children). Anything else = exact match.
@@ -30,8 +30,16 @@ if (!existsSync(scopePath)) process.exit(0); // no active contract
 const rawPath = String(input.tool_input?.file_path ?? "");
 if (!rawPath) process.exit(0);
 
-const rel = (isAbsolute(rawPath) ? relative(projectDir, rawPath) : rawPath)
-  .replaceAll("\\", "/");
+// Resolve to an absolute path, then express it relative to the project root
+// (same derivation as protect-governance.mjs).
+const absPath = isAbsolute(rawPath) ? rawPath : resolve(projectDir, rawPath);
+const rel = relative(projectDir, absPath).replaceAll("\\", "/");
+
+// Outside the repo (or the repo root itself) → not this hook's jurisdiction.
+// Without this, session scratchpads and Claude Code's own memory folder were
+// blocked by the in_scope match while a manifest was active (backlog item,
+// md-view Tasks 44/45/46). Independent of the Bash gap in ADR-002.
+if (rel === "" || rel.startsWith("..") || isAbsolute(rel)) process.exit(0);
 
 // Self-exemption: the manifest itself is always editable, active contract
 // or not. Amending scope IS the Lead-approved amendment flow CLAUDE.md
