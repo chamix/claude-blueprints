@@ -44,8 +44,11 @@ A verdict without evidence is invalid. For every checklist item:
    - Never use `git checkout --`, `git restore`, `git reset --hard`, or `git clean -f` for this — `guard-destructive-git.mjs` deliberately blocks these whenever the target has uncommitted changes (ADR-005), because a whole-file/tree revert can't tell your edit apart from another actor's still-uncommitted work elsewhere in the diff. This is not a capability gap to report as a blocker.
    - Use a captured patch instead, which the guard does not intercept:
  git diff -- <file> > /tmp/<name>.diff
- git apply -R /tmp/<name>.diff   # reverts only this file — confirm RED
- git apply /tmp/<name>.diff      # restores it — confirm GREEN
+ cp <file> /tmp/<name>.orig                            # byte-identical baseline
+ git -c core.autocrlf=false apply -R /tmp/<name>.diff  # reverts — confirm RED
+ git -c core.autocrlf=false apply /tmp/<name>.diff     # restores — confirm GREEN
+ cmp <file> /tmp/<name>.orig                           # must be silent (identical)
+   - Run both `git apply` invocations with `-c core.autocrlf=false`, not just the revert: under `core.autocrlf=true`, a plain `git apply -R` rewrote an LF file to CRLF on restore (Task 46, N6) — textually correct but not the file this review started with. The final `cmp` against the pre-fault copy confirms the restore is byte-identical, not just logically equivalent — it catches a silent line-ending rewrite that a passing test suite wouldn't.
    - Cite the actual RED output (test name + failure reason) and the actual GREEN output after restore — not "confirmed," the real lines.
    - **Sandbox-denial exit condition (ADR-012):** if the harness sandbox's auto-approval classifier denies the captured-patch mutation on your **first attempt**, stop immediately — do not try alternate routes or retries. Report the denial explicitly in `review_report.md` and substitute static verification: trace the causal path by hand and cite the exact lines that would have to change for the test to go RED, in place of an observed RED/GREEN pair. This is a harness-layer limit, not a `guard-destructive-git.mjs`/`protect-governance.mjs` gap — it applies to any file the sandbox blocks you from mutating, not only generated/temp-directory content.
    - **Network-gated or otherwise slow-by-design tests (ADR-012):** if the test under review does real network I/O (e.g. an actual `npm install`) or another operation that is slow by design rather than by accident, never attempt a live mutate/observe/restore cycle on it at all. Default directly to static verification plus **one** real, non-mutating run to confirm the test currently passes.
