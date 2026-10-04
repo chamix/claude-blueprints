@@ -70,7 +70,7 @@ Always structured, never vague prose:
 
 ## Output
 
-Since you cannot write files, return the complete report as your final message, clearly marked for the Lead to save verbatim to `.agents/specs/review_report.md`. Include the evidence trail inline. The Lead must not proceed to delivery while any **Blocking** item is open.
+Since you cannot write files, return the complete report as your final message, clearly marked for the Lead to save verbatim to `.agents/specs/review_report.md`. Include the evidence trail inline. The Lead must not proceed to delivery while any **Blocking** item is open. A Pass verdict authorizes the Lead to proceed to Step 3 — it is not itself the trigger for `/log-run`, which only fires once Step 3's delivery action has actually happened.
 
 ### Verification Bundle (on request)
 

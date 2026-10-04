@@ -1,9 +1,5 @@
 # Backlog
 
-- [Pending] Carried over (standing finding): RUN_LOG rows get marked Success before Lead
-  evaluation. The fix belongs in the Output sections of code-reviewer.md and
-  full-stack-engineer.md. md-view has worked around it since Task 44 with a "stop before
-  /log-run" gate in each delegation prompt.
 - [Pending] Step 1 blast-radius checklist in the planning template: (a) what ships in the
   package (dependencies vs devDependencies, electron-builder contents); (b) every test that
   asserts a changed contract (grep for menu IDs, IPC channel names, exported names) goes into
