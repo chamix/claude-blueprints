@@ -1,12 +1,5 @@
 # Backlog
 
-- [Pending] Step 1 blast-radius checklist in the planning template: (a) what ships in the
-  package (dependencies vs devDependencies, electron-builder contents); (b) every test that
-  asserts a changed contract (grep for menu IDs, IPC channel names, exported names) goes into
-  in_scope with a narrow limit on what may change; (c) which CI tier runs each check (unit and
-  integration only, not e2e). Triggers: md-view Task 45 B3 (Lead's Step 0 said "runtime
-  dependency") and Task 46 (scope list missed window-chrome.spec.ts). The recurring
-  first-round Blocking verdicts trace to planning completeness, not implementation.
 - [Pending] Fault-injection revert under core.autocrlf=true: use
   `git -c core.autocrlf=false apply -R`, then `cmp` against the pre-fault copy. A plain
   `git apply -R` rewrote an LF file to CRLF (md-view Task 46, N6). Change code-reviewer.md
