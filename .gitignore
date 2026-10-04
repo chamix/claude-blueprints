@@ -26,3 +26,4 @@ yarn-error.log*
 
 # Deploy script output/logs, if any land at repo root
 /*.log
+batch-commits.ps1
