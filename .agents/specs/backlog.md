@@ -1,10 +1,5 @@
 # Backlog
 
-- [Pending] Branch prefixes by change type: `feature/`, `fix/`, `chore/`, `docs/` +
-  `<NNN>-<desc>` (Conventional Branch style), instead of `feature/` for everything.
-  Touches: CLAUDE.md branching section (blueprint first, then deploy.ps1), md-view ADR-007
-  (amend or supersede) and docs/CONTRIBUTING.md. Trigger: md-view Task 47 (a race fix
-  that had to use `feature/`).
 - [Pending] `scripts/deploy.ps1` does a `Force` whole-file overwrite of the target's
   `CLAUDE.md` (and the entire `.claude/` tree). Found while porting ADR-010 to `md-view`:
   `md-view/CLAUDE.md` has its own local-only "Branching & Merge Strategy" section, added
