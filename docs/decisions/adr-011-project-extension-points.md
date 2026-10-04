@@ -171,3 +171,15 @@ This ADR is the two ideas combined, applied to the one demonstrated case.
   `md-view/CLAUDE.md` with its current inline Branching section while
   this blueprint's copy switches to the pointer would reintroduce drift
   between the two on day one.
+
+## Follow-up: branch-naming convention superseded (ADR-014)
+
+Decision item 2's quoted default content for `agents-templates/branching.md`
+— `feature/<task>-<desc>` branches, singular, for every change type — was
+accurate when this ADR landed but is no longer the shipped default.
+ADR-014 replaces it with a type-prefixed, Conventional-Branch-style
+convention (`<type>/<task-number>-<short-description>`, `<type>` ∈
+`feature`, `fix`, `chore`, `docs`). This note exists so a future reader
+of this ADR's Decision text isn't misled into thinking `feature/`-only
+naming is still current; the Decision section above is left untouched as
+the historical record of what this ADR actually decided at the time.

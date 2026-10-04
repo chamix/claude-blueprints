@@ -3,9 +3,18 @@
 - `main` is always deployable. No direct commits or pushes to `main` —
   GitHub branch protection enforces this, including for repository admins.
 - Before implementation begins, create a branch named
-  `feature/<task-number>-<short-description>` off the latest `main`
-  (e.g. `feature/036-branching-strategy`), zero-padded to match
-  `RUN_LOG.md`'s task sequence.
+  `<type>/<task-number>-<short-description>` off the latest `main`,
+  zero-padded to match `RUN_LOG.md`'s task sequence. `<type>` is one
+  of `feature`, `fix`, `chore`, `docs` — picked by what the change
+  *is*, not by which persona or task template produced it:
+  - `feature/` — new capability or behavior.
+  - `fix/` — corrects existing behavior (a bug, a race condition,
+    a wrong default).
+  - `chore/` — maintenance with no behavior change a user would
+    notice (dependency bumps, config, tooling, renames).
+  - `docs/` — documentation-only (README, ADRs, comments) with no
+    code change at all.
+  (e.g. `fix/047-race-condition`, `docs/048-readme-friction-section`)
 - All commits for the task land on that branch. The user performs every
   `git commit`/`git push` — subagents never invoke git commit or push.
 - Once the task closes (Step 3 above), open a pull request from the
