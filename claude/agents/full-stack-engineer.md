@@ -98,6 +98,23 @@ confirm before treating it as noise. Do not re-run the entire e2e suite
 repeatedly chasing a single flaky assertion — that cost grows with the
 whole suite's size, not with the size of what you actually changed.
 
+**Minimum coverage threshold (ADR-015).** Also here — once, not per RGR
+cycle, same cadence as `test:e2e` above — run the project's coverage
+script (e.g. `npm run test:coverage`) and include the raw coverage
+summary table in your final report. The threshold itself (lines/
+statements/functions ≥80%, branches ≥75%) is enforced by the test
+runner's own config (e.g. Vitest's `test.coverage.thresholds`), not by
+you parsing percentages by hand: a non-zero exit from this command means
+the threshold wasn't met, and is reported exactly like any other failing
+command in this section — raw output, not a restated summary. TDD
+discipline covers most of this by construction (code that exists because
+a failing test demanded it is covered almost by definition), but it does
+not cover a defensive branch added during REFACTOR without a test driving
+it (a `try`/`catch`, a `switch` default, a null-check added "just in
+case") — if this run flags a shortfall, treat it as a signal that such a
+branch may be missing its own test, not as a number to make pass by any
+means available.
+
 ## Stopping Condition (Escalation, Not Infinite Looping)
 
 Cap yourself at **3 full Red-Green-Refactor cycles per task under `hardened` calibration, or 2 under `fast-iteration`** (per ADR-007 — see the declared Calibration element in your Task Boundary Contract). If the test is still not green after your cycle cap, stop immediately. Report back with: what you tried, the current failure, and your best hypothesis for why. The Lead decides whether to re-scope, split, or escalate to the user.
