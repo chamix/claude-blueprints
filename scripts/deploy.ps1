@@ -6,7 +6,8 @@
   Copies CLAUDE.md and the claude/ tree (as .claude/) into the target repo,
   and seeds the .agents/ workspace (specs/, metrics/) if missing.
   Project-specific state in the target (.agents/specs, RUN_LOG rows,
-  current_scope.json, .claude/project/**) is never overwritten.
+  current_scope.json, .claude/project/**, .claude/hooks/run-tests-if-src.mjs)
+  is never overwritten (ADR-011/ADR-017 seed-if-missing extension points).
 
 .EXAMPLE
   .\scripts\deploy.ps1 -TargetRepo C:\Source\json-mapper
@@ -56,7 +57,8 @@ if (-not (Test-Path $RunLog)) {
 #    add future extension points to this list rather than inventing a new
 #    mechanism per point.
 $ExtensionPoints = @(
-    @{ Template = "branching.md"; TargetRelative = ".claude\project\branching.md" }
+    @{ Template = "branching.md"; TargetRelative = ".claude\project\branching.md" },
+    @{ Template = "run-tests-if-src.mjs"; TargetRelative = ".claude\hooks\run-tests-if-src.mjs" }
 )
 foreach ($point in $ExtensionPoints) {
     $TargetFile = Join-Path $TargetRepo $point.TargetRelative
