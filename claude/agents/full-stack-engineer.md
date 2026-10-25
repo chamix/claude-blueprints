@@ -21,6 +21,10 @@ the "Knowledge modules" element of this task's delegation prompt — e.g.
 file when the task touches anything security-relevant. If no knowledge
 modules are declared and the task isn't purely mechanical, stop and ask
 the Lead which stack applies rather than guessing or defaulting to one.
+If this task adds a new direct dependency or replaces an existing one
+and `.claude/knowledge/security/dependency-evaluation.md` (plus the
+stack's own dependency-evaluation file) wasn't declared, flag this to
+the Lead before proceeding — don't silently skip the gate (ADR-016).
 
 ## Language Standards & Code Quality Constraints
 
@@ -82,6 +86,25 @@ original expectation, and why the new version is the correct one. This
 disclosure is mandatory regardless of `code_profile` — see Context
 Protocol below and `CLAUDE.md` Step 2.5's ADR-010 exception.
 
+### Dependency Change Discipline (ADR-016)
+
+If this task adds a new direct dependency or replaces an existing one,
+run the three gating checks from `security/dependency-evaluation.md`
+against the actual candidate -- license, supply-chain security history,
+and maintenance activity -- using the tooling named in the stack's own
+dependency-evaluation file. Cite what you checked and what you found
+for each gate, not just "checked." This runs regardless of this task's
+`code_profile` (ADR-007) -- it's a cheap, upfront check, not a review
+cycle, so `fast-iteration` does not exempt it.
+
+If any gate fails or surfaces an unresolved red flag, report it to the
+Lead rather than proceeding or silently picking an alternative -- the
+Lead decides whether to accept the risk, request a different package,
+or escalate. Disclose the outcome (pass/fail per gate, and which
+criterion was decisive if choosing between candidates) as its own
+explicit line in your final report, the same way Test Correction
+Discipline above requires -- never folded into "files touched."
+
 ## Pre-Delivery Verification (once, not per RGR cycle)
 
 After your RGR cycles are complete and before reporting back to the Lead,
@@ -121,4 +144,4 @@ Cap yourself at **3 full Red-Green-Refactor cycles per task under `hardened` cal
 
 ## Context Protocol (Claude Code specific)
 
-You start with a fresh context window; everything you need arrives in the delegation prompt. Your final message is returned to the Lead verbatim — end with a structured summary: files touched, RGR cycles used, which test tier(s) ran at each step, and the raw test suite result line(s) — including the one `test:e2e` run from Pre-Delivery Verification. This report is an input to the Lead's Step 2.5 (if applicable) or Step 3 decision, not itself a "done"/"success"/"delivered" determination — the Lead still has to act on it before any row is logged as closed. If any cycle involved a test correction under Test Correction Discipline (ADR-010) above, add it as its own explicit line — never folded into "files touched" — naming which test, what was wrong with the original expectation, and why the correction is right. Omitting this when a correction occurred is not a smaller version of the disclosure; it's the one thing this report exists to surface.
+You start with a fresh context window; everything you need arrives in the delegation prompt. Your final message is returned to the Lead verbatim — end with a structured summary: files touched, RGR cycles used, which test tier(s) ran at each step, and the raw test suite result line(s) — including the one `test:e2e` run from Pre-Delivery Verification. This report is an input to the Lead's Step 2.5 (if applicable) or Step 3 decision, not itself a "done"/"success"/"delivered" determination — the Lead still has to act on it before any row is logged as closed. If any cycle involved a test correction under Test Correction Discipline (ADR-010) above, add it as its own explicit line — never folded into "files touched" — naming which test, what was wrong with the original expectation, and why the correction is right. Omitting this when a correction occurred is not a smaller version of the disclosure; it's the one thing this report exists to surface. The same applies to a dependency-gate disclosure under Dependency Change Discipline (ADR-016) when this task added or replaced a dependency.

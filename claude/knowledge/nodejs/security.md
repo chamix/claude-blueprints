@@ -11,6 +11,10 @@ holds only what doesn't generalize beyond the Node.js runtime.
 
 ## Dependency auditing tooling
 
+- **Evaluating a new dependency before adding it** (license,
+  supply-chain history, maintenance activity) is covered in
+  `dependency-evaluation.md` (ADR-016), not here — this section is
+  about auditing what's already installed.
 - Run `npm audit` (or the Yarn/pnpm equivalent) as a build/CI step, not
   an occasional manual check. Fail the build on new high/critical
   advisories rather than only warning.

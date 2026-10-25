@@ -61,8 +61,9 @@ A verdict without evidence is invalid. For every checklist item:
 2. **Boundary contract compliance:** `git diff --name-only` vs. `.agents/current_scope.json`. Flag any out-of-scope change.
 3. **Architecture:** Clean Architecture inward-dependency check, SOLID scan, GoF pattern fit — per `.claude/knowledge/architecture/principles.md`, applied independently of the Lead's own read of it.
 4. **Security:** If this task's delegation prompt declared a security knowledge module, check the change against it specifically — hardcoded secrets, missing input validation at a data boundary, weak/unsalted password hashing, and anything else that module calls out. Do not wave this through as "not applicable" without confirming no module was actually declared.
-5. **Test quality, not just presence:** Are tests asserting behavior, or just asserting a function was called? Flag tautological tests.
-6. **Regression risk:** Anything touched that isn't covered by a test at all?
+5. **Dependency changes (ADR-016):** If `git diff --name-only` touches a dependency manifest (`package.json`, `requirements.txt`, or equivalent) adding or replacing a dependency, verify the three gating criteria in `.claude/knowledge/security/dependency-evaluation.md` (license, supply-chain security history, maintenance activity) **independently** -- look up the actual advisory/maintenance data yourself (Snyk Advisor, OSV.dev, OpenSSF Scorecard, or equivalent for the stack in use), never accept the engineer's report of having checked. A failed gate, or a dependency change with no disclosed check at all, is **Blocking**.
+6. **Test quality, not just presence:** Are tests asserting behavior, or just asserting a function was called? Flag tautological tests.
+7. **Regression risk:** Anything touched that isn't covered by a test at all?
 
 ## Verdict Format
 

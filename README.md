@@ -71,6 +71,18 @@ outright rather than adjusting a threshold: the independent
 lighter standards. The Lead states this explicitly in its final report
 whenever it happens — the absence of review is never left implicit.
 
+## Dependency Evaluation
+
+Per ADR-016, adding or replacing a third-party dependency isn't a free
+action. `full-stack-engineer` runs three gating checks -- license,
+supply-chain security history, maintenance activity -- against
+`claude/knowledge/security/dependency-evaluation.md` before using the
+package, and discloses the outcome explicitly in its final report.
+`code-reviewer` re-verifies the same gates independently whenever it
+runs. Unlike the `code-reviewer` gate itself, this check is not skipped
+under `fast-iteration` -- it's cheap enough that the profile distinction
+doesn't apply to it.
+
 ## Known Environment Friction Patterns
 
 Distinct in purpose from `backlog.md`/`RUN_LOG.md`, which are

@@ -62,7 +62,11 @@ this file stays free of anything that only applies to one runtime.
   vulnerabilities (OWASP's list of top web-application risks includes
   vulnerable/outdated components). Audit dependencies regularly as part
   of the normal build/CI process, not as an occasional manual task.
-  Stack-specific tooling for this lives in the relevant stack's own
+- Before *adding* a new dependency or replacing an existing one, run it
+  through `dependency-evaluation.md` (ADR-016) in this same directory —
+  license, supply-chain security history, and maintenance activity are
+  gating criteria, not optional nice-to-haves. Stack-specific tooling
+  for both auditing and evaluation lives in the relevant stack's own
   knowledge module.
 
 ## Logging & error handling
