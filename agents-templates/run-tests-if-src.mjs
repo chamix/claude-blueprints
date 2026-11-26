@@ -30,8 +30,17 @@ import { spawnSync } from "node:child_process";
 import { relative, isAbsolute, join, dirname } from "node:path";
 
 const input = JSON.parse(readFileSync(0, "utf8"));
-const projectDir =
-  process.env.CLAUDE_PROJECT_DIR ?? input.cwd ?? process.cwd();
+// vitest/vite fail every suite when the working directory has a lowercase
+// Windows drive letter (`c:\\Source\\...`), which some harnesses pass in
+// CLAUDE_PROJECT_DIR / input.cwd. Uppercase it before spawning npm so the
+// hook's signal reflects the code, not the drive-letter casing. No-op for
+// POSIX paths and for already-uppercase drives.
+const normalizeDriveLetter = (p) =>
+  p.replace(/^[a-z]:(?=[\\/])/, (m) => m.toUpperCase());
+
+const projectDir = normalizeDriveLetter(
+  process.env.CLAUDE_PROJECT_DIR ?? input.cwd ?? process.cwd()
+);
 
 const LOG_PATH = join(projectDir, ".agents", "metrics", "test-tier-invocations.ndjson");
 
